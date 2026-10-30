@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import type { Readable } from "stream";
 
+import { TTS_PROSODY } from "@/constants";
+
 export const runtime = "nodejs";
 
 /** POST { text, voice } → audio/mpeg (mp3 bytes) */
@@ -12,11 +14,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No text to speak" }, { status: 400 });
   }
 
+  const voiceName = voice || "ur-PK-UzmaNeural";
   const tts = new MsEdgeTTS();
-  await tts.setMetadata(voice || "ur-PK-UzmaNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+  await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+
+  // language ke hisab se speaking style (e.g. Urdu -12% rate)
+  const prosody = Object.entries(TTS_PROSODY).find(([prefix]) => voiceName.startsWith(prefix))?.[1];
 
   // msedge-tts versions differ: toStream returns a Readable, or { audioStream }
-  const result = tts.toStream(text) as unknown as Readable | { audioStream: Readable };
+  const result = tts.toStream(text, prosody) as unknown as Readable | { audioStream: Readable };
   const stream: Readable = "audioStream" in result ? result.audioStream : result;
 
   const chunks: Buffer[] = [];

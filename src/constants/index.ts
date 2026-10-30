@@ -72,6 +72,11 @@ export const FALLBACK_REPLIES: Record<LanguageCode, string> = {
   en: "Sorry, I did not catch that. Could you please say it again?",
 };
 
+/** Speaking-style tweaks per language prefix — Urdu thori aahista behtar lagti hai. */
+export const TTS_PROSODY: Record<string, { rate?: string; pitch?: string }> = {
+  "ur-": { rate: "-12%" },
+};
+
 /** Voice-activity-detection tuning for the recorder. */
 export const VAD = {
   /** itni khamoshi ke baad auto-stop */
